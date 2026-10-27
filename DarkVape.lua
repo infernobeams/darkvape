@@ -15774,7 +15774,7 @@ run(function()
 	
 				local index = 1
 				repeat
-					local message = 'vxpe on top'
+					local message = 'darkvape on top get cooked'
 					if #Lines.ListEnabled > 0 then
 						if Mode.Value == 'Order' then
 							message = Lines.ListEnabled[index] or Lines.ListEnabled[1]
@@ -16751,7 +16751,8 @@ local CustomTimeToggle, CustomClockTime, CustomFogToggle, CustomFogDensity
 local Toggles = {}
 local newobjects, oldobjects = {}, {}
 local weatherPart, emitterPrimary, emitterSecondary, lightningFolder
-local oceanFolder, oceanSurface, oceanDeep, oceanTex1, oceanTex2
+local oceanFolder, oceanSurface, oceanGlow, oceanDeep, oceanTex1, oceanTex2
+local oceanWaves = {}
 local savedLighting = nil
 local nextLightning = 0
 local flashAlpha = 0
@@ -16848,16 +16849,21 @@ local themePresets = {
 	},
 	['Rain'] = {
 		Weather = 'Rain',
+		Clouds = {
+			Cover = 0.88,
+			Density = 0.85,
+			Color = Color3.fromRGB(192, 206, 224)
+		},
 		Lighting = {
-			ClockTime = 15.2,
-			Brightness = 1.4,
-			Ambient = Color3.fromRGB(92, 106, 128),
-			OutdoorAmbient = Color3.fromRGB(110, 126, 148),
-			ColorShift_Top = Color3.fromRGB(130, 150, 180),
-			ColorShift_Bottom = Color3.fromRGB(75, 88, 108),
-			FogColor = Color3.fromRGB(108, 124, 146),
-			FogStart = 45,
-			FogEnd = 480
+			ClockTime = 13.5,
+			Brightness = 2.5,
+			Ambient = Color3.fromRGB(192, 204, 222),
+			OutdoorAmbient = Color3.fromRGB(206, 218, 235),
+			ColorShift_Top = Color3.fromRGB(210, 224, 245),
+			ColorShift_Bottom = Color3.fromRGB(175, 190, 212),
+			FogColor = Color3.fromRGB(190, 205, 226),
+			FogStart = 1200,
+			FogEnd = 10000
 		},
 		Sky = {
 			SkyboxUp = 'rbxassetid://150939022',
@@ -16870,18 +16876,18 @@ local themePresets = {
 			SunAngularSize = 0
 		},
 		Atmosphere = {
-			Color = Color3.fromRGB(118, 136, 162),
-			Decay = Color3.fromRGB(76, 90, 114),
-			Density = 0.45,
+			Color = Color3.fromRGB(195, 212, 235),
+			Decay = Color3.fromRGB(165, 184, 210),
+			Density = 0.14,
 			Offset = 0.1,
 			Glare = 0,
-			Haze = 3.2
+			Haze = 0.6
 		},
 		ColorCorrection = {
-			TintColor = Color3.fromRGB(205, 222, 242),
-			Saturation = -0.18,
-			Contrast = 0.06,
-			Brightness = -0.03
+			TintColor = Color3.fromRGB(242, 248, 255),
+			Saturation = -0.05,
+			Contrast = 0.05,
+			Brightness = 0.04
 		},
 		Bloom = {
 			Intensity = 0.35,
@@ -16891,16 +16897,21 @@ local themePresets = {
 	},
 	['Snow'] = {
 		Weather = 'Snow',
+		Clouds = {
+			Cover = 0.82,
+			Density = 0.80,
+			Color = Color3.fromRGB(235, 244, 255)
+		},
 		Lighting = {
 			ClockTime = 13.5,
-			Brightness = 2.1,
-			Ambient = Color3.fromRGB(158, 178, 202),
-			OutdoorAmbient = Color3.fromRGB(192, 212, 235),
-			ColorShift_Top = Color3.fromRGB(220, 238, 255),
-			ColorShift_Bottom = Color3.fromRGB(150, 175, 205),
-			FogColor = Color3.fromRGB(222, 236, 252),
-			FogStart = 55,
-			FogEnd = 560
+			Brightness = 2.4,
+			Ambient = Color3.fromRGB(185, 202, 222),
+			OutdoorAmbient = Color3.fromRGB(205, 222, 240),
+			ColorShift_Top = Color3.fromRGB(228, 242, 255),
+			ColorShift_Bottom = Color3.fromRGB(175, 195, 220),
+			FogColor = Color3.fromRGB(226, 238, 252),
+			FogStart = 900,
+			FogEnd = 9000
 		},
 		Sky = {
 			SkyboxUp = 'rbxassetid://150939022',
@@ -16914,15 +16925,15 @@ local themePresets = {
 		},
 		Atmosphere = {
 			Color = Color3.fromRGB(226, 240, 255),
-			Decay = Color3.fromRGB(172, 205, 238),
-			Density = 0.41,
+			Decay = Color3.fromRGB(185, 212, 240),
+			Density = 0.16,
 			Offset = 0.18,
 			Glare = 0.25,
-			Haze = 2.8
+			Haze = 0.8
 		},
 		ColorCorrection = {
-			TintColor = Color3.fromRGB(232, 244, 255),
-			Saturation = -0.08,
+			TintColor = Color3.fromRGB(240, 248, 255),
+			Saturation = -0.04,
 			Contrast = 0.06,
 			Brightness = 0.05
 		},
@@ -16934,16 +16945,21 @@ local themePresets = {
 	},
 	['Thunderstorm'] = {
 		Weather = 'Thunderstorm',
+		Clouds = {
+			Cover = 0.93,
+			Density = 0.90,
+			Color = Color3.fromRGB(148, 164, 188)
+		},
 		Lighting = {
-			ClockTime = 18.5,
-			Brightness = 0.9,
-			Ambient = Color3.fromRGB(58, 68, 88),
-			OutdoorAmbient = Color3.fromRGB(72, 84, 108),
-			ColorShift_Top = Color3.fromRGB(82, 98, 130),
-			ColorShift_Bottom = Color3.fromRGB(38, 44, 62),
-			FogColor = Color3.fromRGB(45, 54, 72),
-			FogStart = 35,
-			FogEnd = 360
+			ClockTime = 14.0,
+			Brightness = 2.4,
+			Ambient = Color3.fromRGB(184, 196, 216),
+			OutdoorAmbient = Color3.fromRGB(198, 210, 230),
+			ColorShift_Top = Color3.fromRGB(195, 212, 238),
+			ColorShift_Bottom = Color3.fromRGB(165, 180, 205),
+			FogColor = Color3.fromRGB(172, 188, 212),
+			FogStart = 1200,
+			FogEnd = 10000
 		},
 		Sky = {
 			SkyboxUp = 'rbxassetid://150939022',
@@ -16957,23 +16973,23 @@ local themePresets = {
 			MoonAngularSize = 0
 		},
 		Atmosphere = {
-			Color = Color3.fromRGB(56, 66, 86),
-			Decay = Color3.fromRGB(30, 36, 50),
-			Density = 0.52,
+			Color = Color3.fromRGB(175, 192, 218),
+			Decay = Color3.fromRGB(145, 164, 192),
+			Density = 0.15,
 			Offset = 0.1,
 			Glare = 0,
-			Haze = 4.0
+			Haze = 0.7
 		},
 		ColorCorrection = {
-			TintColor = Color3.fromRGB(178, 195, 225),
-			Saturation = -0.24,
-			Contrast = 0.16,
-			Brightness = -0.07
+			TintColor = Color3.fromRGB(238, 245, 255),
+			Saturation = -0.06,
+			Contrast = 0.07,
+			Brightness = 0.04
 		},
 		Bloom = {
-			Intensity = 0.6,
-			Size = 26,
-			Threshold = 0.85
+			Intensity = 0.5,
+			Size = 24,
+			Threshold = 0.88
 		}
 	},
 	['Colorful Sky'] = {
@@ -17024,22 +17040,16 @@ local themePresets = {
 		Weather = 'None',
 		Lighting = {
 			ClockTime = 0,
-			Brightness = 2.2,
-			Ambient = Color3.fromRGB(165, 165, 172),
-			OutdoorAmbient = Color3.fromRGB(165, 165, 172),
-			ColorShift_Top = Color3.new(0, 0, 0),
-			ColorShift_Bottom = Color3.new(0, 0, 0),
+			Brightness = 3.0,
+			Ambient = Color3.fromRGB(235, 235, 242),
+			OutdoorAmbient = Color3.fromRGB(235, 235, 242),
+			ColorShift_Top = Color3.fromRGB(255, 255, 255),
+			ColorShift_Bottom = Color3.fromRGB(235, 235, 242),
 			FogColor = Color3.new(0, 0, 0),
-			FogStart = 500,
+			FogStart = 100000,
 			FogEnd = 100000
 		},
 		Sky = {
-			SkyboxUp = 'rbxassetid://0',
-			SkyboxDn = 'rbxassetid://0',
-			SkyboxLf = 'rbxassetid://0',
-			SkyboxRt = 'rbxassetid://0',
-			SkyboxFt = 'rbxassetid://0',
-			SkyboxBk = 'rbxassetid://0',
 			CelestialBodiesShown = false,
 			StarCount = 0,
 			SunAngularSize = 0,
@@ -17048,16 +17058,16 @@ local themePresets = {
 		Atmosphere = {
 			Color = Color3.new(0, 0, 0),
 			Decay = Color3.new(0, 0, 0),
-			Density = 0.75,
+			Density = 0,
 			Offset = 0,
 			Glare = 0,
-			Haze = 10
+			Haze = 0
 		},
 		ColorCorrection = {
 			TintColor = Color3.fromRGB(255, 255, 255),
-			Saturation = 0.05,
-			Contrast = 0.08,
-			Brightness = 0.02
+			Saturation = 0.08,
+			Contrast = 0.06,
+			Brightness = 0.06
 		},
 		Bloom = {
 			Intensity = 0.25,
@@ -17105,84 +17115,88 @@ local function cleanupWeather()
 	emitterSecondary = nil
 end
 
+local lastTerrainWaterCenter = nil
+local lastTerrainWaterSize = nil
+
 local function cleanupOcean()
+	if lastTerrainWaterCenter and lastTerrainWaterSize then
+		pcall(function()
+			workspace.Terrain:FillBlock(CFrame.new(lastTerrainWaterCenter), lastTerrainWaterSize, Enum.Material.Air)
+		end)
+		lastTerrainWaterCenter = nil
+		lastTerrainWaterSize = nil
+	end
 	if oceanFolder then
 		pcall(function() oceanFolder:Destroy() end)
 		oceanFolder = nil
 	end
 	oceanSurface = nil
+	oceanGlow = nil
 	oceanDeep = nil
 	oceanTex1 = nil
 	oceanTex2 = nil
+	table.clear(oceanWaves)
 end
 
 local function computeMapFloorY()
+	if lplr.Character and lplr.Character:FindFirstChild('HumanoidRootPart') then
+		return lplr.Character.HumanoidRootPart.Position.Y - 4
+	end
 	local lowest = math.huge
 	pcall(function()
 		local map = workspace:FindFirstChild('Map')
 		if map then
 			for _, part in ipairs(map:GetDescendants()) do
-				if part:IsA('BasePart') and part.CanCollide and part.Position.Y > -200 and part.Position.Y < lowest then
+				if part:IsA('BasePart') and part.CanCollide and part.Position.Y > 8 and part.Position.Y < lowest then
 					lowest = part.Position.Y
 				end
 			end
 		end
 	end)
 	if lowest ~= math.huge then return lowest end
-	if lplr.Character and lplr.Character:FindFirstChild('HumanoidRootPart') then
-		return lplr.Character.HumanoidRootPart.Position.Y - 4
-	end
-	return 0
+	return 15
+end
+
+local function fillOceanTerrainAt(cx, cz)
+	pcall(function()
+		local t = workspace.Terrain
+		if not t then return end
+		local col = OceanColor and Color3.fromHSV(OceanColor.Hue, OceanColor.Sat, OceanColor.Value) or Color3.fromRGB(12, 114, 204)
+		t.WaterColor = col
+		t.WaterReflectance = 0.65
+		t.WaterTransparency = 0.22
+		t.WaterWaveSize = 0.65
+		t.WaterWaveSpeed = 18
+
+		local newCenter = Vector3.new(math.floor(cx / 64) * 64, (baseOceanY or 0) - 6, math.floor(cz / 64) * 64)
+		local newSize = Vector3.new(1800, 14, 1800)
+		if lastTerrainWaterCenter and (lastTerrainWaterCenter - newCenter).Magnitude > 16 then
+			t:FillBlock(CFrame.new(lastTerrainWaterCenter), lastTerrainWaterSize or newSize, Enum.Material.Air)
+		end
+		t:FillBlock(CFrame.new(newCenter), newSize, Enum.Material.Water)
+		lastTerrainWaterCenter = newCenter
+		lastTerrainWaterSize = newSize
+	end)
 end
 
 local function configureOceanVoid()
 	cleanupOcean()
 	if not OceanVoidToggle or not OceanVoidToggle.Enabled then return end
 
-	baseOceanY = computeMapFloorY() - (OceanDepth and OceanDepth.Value or 14)
-	local col = OceanColor and Color3.fromHSV(OceanColor.Hue, OceanColor.Sat, OceanColor.Value) or Color3.fromRGB(16, 108, 182)
-	local deepCol = col:Lerp(Color3.fromRGB(4, 18, 42), 0.65)
+	baseOceanY = computeMapFloorY() - (OceanDepth and OceanDepth.Value or 18)
+	local col = OceanColor and Color3.fromHSV(OceanColor.Hue, OceanColor.Sat, OceanColor.Value) or Color3.fromRGB(12, 114, 204)
+	local deepCol = col:Lerp(Color3.fromRGB(4, 38, 96), 0.65)
 
 	oceanFolder = Instance.new('Folder')
 	oceanFolder.Name = 'DarkVapeOceanVoid'
 	oceanFolder.Parent = workspace.CurrentCamera or workspace
 
-	oceanSurface = Instance.new('Part')
-	oceanSurface.Name = 'OceanSurface'
-	oceanSurface.Size = Vector3.new(2048, 1.5, 2048)
-	oceanSurface.Anchored = true
-	oceanSurface.CanCollide = false
-	oceanSurface.CanQuery = false
-	oceanSurface.CanTouch = false
-	oceanSurface.Massless = true
-	oceanSurface.Material = Enum.Material.Glass
-	oceanSurface.Color = col
-	oceanSurface.Transparency = 0.18
-	oceanSurface.Reflectance = 0.32
-	oceanSurface.CastShadow = false
-	oceanSurface.Position = Vector3.new(0, baseOceanY, 0)
-	oceanSurface.Parent = oceanFolder
+	local cam = workspace.CurrentCamera
+	local cx = cam and cam.CFrame.Position.X or 0
+	local cz = cam and cam.CFrame.Position.Z or 0
+	fillOceanTerrainAt(cx, cz)
 
-	oceanTex1 = Instance.new('Texture')
-	oceanTex1.Name = 'WaveLayer1'
-	oceanTex1.Face = Enum.NormalId.Top
-	oceanTex1.Texture = 'rbxasset://textures/water/normal_01.dds'
-	oceanTex1.Color3 = col:Lerp(Color3.fromRGB(190, 235, 255), 0.45)
-	oceanTex1.Transparency = 0.45
-	oceanTex1.StudsPerTileU = 36
-	oceanTex1.StudsPerTileV = 36
-	oceanTex1.Parent = oceanSurface
-
-	oceanTex2 = Instance.new('Texture')
-	oceanTex2.Name = 'WaveFoamLayer'
-	oceanTex2.Face = Enum.NormalId.Top
-	oceanTex2.Texture = 'rbxasset://textures/particles/smoke_main.dds'
-	oceanTex2.Color3 = Color3.fromRGB(215, 244, 255)
-	oceanTex2.Transparency = 0.72
-	oceanTex2.StudsPerTileU = 52
-	oceanTex2.StudsPerTileV = 52
-	oceanTex2.Parent = oceanSurface
-
+	-- Deep marine seabed floor underneath the real Terrain water so skybox doesn't bleed through
 	oceanDeep = Instance.new('Part')
 	oceanDeep.Name = 'OceanAbyss'
 	oceanDeep.Size = Vector3.new(2048, 4, 2048)
@@ -17193,18 +17207,28 @@ local function configureOceanVoid()
 	oceanDeep.Massless = true
 	oceanDeep.Material = Enum.Material.SmoothPlastic
 	oceanDeep.Color = deepCol
-	oceanDeep.Transparency = 0.04
+	oceanDeep.Transparency = 0
 	oceanDeep.CastShadow = false
-	oceanDeep.Position = Vector3.new(0, baseOceanY - 7, 0)
+	oceanDeep.Position = Vector3.new(cx, baseOceanY - 14, cz)
 	oceanDeep.Parent = oceanFolder
+	oceanSurface = oceanDeep
 end
 
 local function clearCustomObjects()
 	for _, v in ipairs(newobjects) do
 		pcall(function() v:Destroy() end)
 	end
+	if workspace.Terrain then
+		for _, child in ipairs(workspace.Terrain:GetChildren()) do
+			if child:IsA('Clouds') and child.Name == 'DarkVapeClouds' then
+				pcall(function() child:Destroy() end)
+			end
+		end
+	end
 	for _, v in ipairs(oldobjects) do
-		pcall(function() v.Parent = lightingService end)
+		pcall(function()
+			v.Parent = v:IsA('Clouds') and workspace.Terrain or lightingService
+		end)
 	end
 	table.clear(newobjects)
 	table.clear(oldobjects)
@@ -17523,6 +17547,24 @@ local function applyTheme()
 				bloom.Parent = lightingService
 				table.insert(newobjects, bloom)
 			end
+			if preset.Clouds and workspace.Terrain then
+				pcall(function()
+					for _, child in ipairs(workspace.Terrain:GetChildren()) do
+						if child:IsA('Clouds') and child.Name ~= 'DarkVapeClouds' then
+							table.insert(oldobjects, child)
+							child.Parent = nil
+						end
+					end
+					local clouds = Instance.new('Clouds')
+					clouds.Name = 'DarkVapeClouds'
+					clouds.Cover = preset.Clouds.Cover or 0.85
+					clouds.Density = preset.Clouds.Density or 0.85
+					clouds.Color = preset.Clouds.Color or Color3.fromRGB(190, 204, 222)
+					clouds.Enabled = true
+					clouds.Parent = workspace.Terrain
+					table.insert(newobjects, clouds)
+				end)
+			end
 		end
 	end
 
@@ -17531,7 +17573,7 @@ local function applyTheme()
 	nextLightning = os.clock() + math.random(3, 6)
 end
 
-Atmosphere = vape.Legit:CreateModule({
+Atmosphere = vape.Categories.Render:CreateModule({
 	Name = 'Atmosphere',
 	Function = function(callback)
 		if callback then
@@ -17548,18 +17590,17 @@ Atmosphere = vape.Legit:CreateModule({
 					local swayZ = math.cos(t * 0.7) * (wind * 0.35)
 					weatherPart.CFrame = CFrame.new(cam.CFrame.Position + Vector3.new(swayX, 42, swayZ))
 				end
-				if oceanSurface and oceanDeep and cam then
-					local bob = math.sin(t * 1.6) * 0.65
-					local oy = (baseOceanY or -14) + bob
-					oceanSurface.Position = Vector3.new(cam.CFrame.Position.X, oy, cam.CFrame.Position.Z)
-					oceanDeep.Position = Vector3.new(cam.CFrame.Position.X, oy - 7, cam.CFrame.Position.Z)
-					if oceanTex1 then
-						oceanTex1.OffsetStudsU = (t * 4.2) % 36
-						oceanTex1.OffsetStudsV = (t * 2.8) % 36
+				if oceanDeep and cam then
+					local cx, cz = cam.CFrame.Position.X, cam.CFrame.Position.Z
+					oceanDeep.Position = Vector3.new(cx, (baseOceanY or 0) - 14, cz)
+					if not lastTerrainWaterCenter or (Vector3.new(cx, lastTerrainWaterCenter.Y, cz) - lastTerrainWaterCenter).Magnitude > 220 then
+						fillOceanTerrainAt(cx, cz)
 					end
-					if oceanTex2 then
-						oceanTex2.OffsetStudsU = (-t * 2.6) % 52
-						oceanTex2.OffsetStudsV = (t * 3.4) % 52
+					if lplr.Character then
+						local hum = lplr.Character:FindFirstChildOfClass('Humanoid')
+						if hum then
+							pcall(function() hum:SetStateEnabled(Enum.HumanoidStateType.Swimming, false) end)
+						end
 					end
 				end
 
@@ -17690,7 +17731,7 @@ OceanDepth = Atmosphere:CreateSlider({
 	Name = 'Ocean Depth',
 	Min = 4,
 	Max = 45,
-	Default = 14,
+	Default = 12,
 	Suffix = 'studs',
 	Darker = true,
 	Function = function()
@@ -17700,15 +17741,19 @@ OceanDepth = Atmosphere:CreateSlider({
 
 OceanColor = Atmosphere:CreateColorSlider({
 	Name = 'Ocean Color',
-	DefaultHue = 0.56,
-	DefaultSat = 0.88,
-	DefaultValue = 0.72,
+	DefaultHue = 0.568,
+	DefaultSat = 0.94,
+	DefaultValue = 0.82,
 	Darker = true,
 	Function = function(h, s, v)
-		if oceanSurface and oceanDeep then
-			local c = Color3.fromHSV(h, s, v)
-			oceanSurface.Color = c
-			oceanDeep.Color = c:Lerp(Color3.fromRGB(4, 18, 42), 0.65)
+		local c = Color3.fromHSV(h, s, v)
+		pcall(function()
+			if workspace.Terrain then
+				workspace.Terrain.WaterColor = c
+			end
+		end)
+		if oceanDeep then
+			oceanDeep.Color = c:Lerp(Color3.fromRGB(4, 38, 96), 0.65)
 		end
 	end
 })
@@ -18536,6 +18581,201 @@ function TungTungSahur:GetMorphState()
 		HasBillboard = billboardObj ~= nil and billboardObj.Parent ~= nil
 	}
 end
+
+end)
+
+run(function()
+-- bedwars/patches/NickHider.lua
+-- Lua / NickHider.lua / Luau / x64 / Windows / Roblox BedWars
+
+local NickHider
+local CustomNick
+local HideOthers
+local OtherNick
+
+local originalTexts = setmetatable({}, { __mode = 'k' })
+local hookedSignals = setmetatable({}, { __mode = 'k' })
+local updatingText = false
+
+local function escapePattern(s)
+	return (tostring(s):gsub('([%^%$%(%)%%%.%[%]%*%+%-%?])', '%%%1'))
+end
+
+local function maskString(str)
+	if type(str) ~= 'string' or str == '' then return str end
+	local myReplacement = (CustomNick and CustomNick.Value ~= '' and CustomNick.Value) or '.gg/darkvape'
+	local out = str
+
+	if lplr then
+		local uname = lplr.Name
+		local dname = lplr.DisplayName
+		if dname and #dname >= 2 then
+			out = out:gsub(escapePattern(dname), myReplacement)
+		end
+		if uname and #uname >= 2 then
+			out = out:gsub(escapePattern(uname), myReplacement)
+		end
+	end
+
+	if HideOthers and HideOthers.Enabled then
+		local otherRep = (OtherNick and OtherNick.Value ~= '' and OtherNick.Value) or '.gg/darkvape'
+		for _, plr in ipairs(playersService:GetPlayers()) do
+			if plr ~= lplr then
+				if plr.DisplayName and #plr.DisplayName >= 2 then
+					out = out:gsub(escapePattern(plr.DisplayName), otherRep)
+				end
+				if plr.Name and #plr.Name >= 2 then
+					out = out:gsub(escapePattern(plr.Name), otherRep)
+				end
+			end
+		end
+	end
+
+	return out
+end
+
+local function processTextInstance(inst)
+	if not NickHider or not NickHider.Enabled then return end
+	if not inst or not (inst:IsA('TextLabel') or inst:IsA('TextButton')) then return end
+	pcall(function()
+		local current = inst.Text
+		if type(current) ~= 'string' or current == '' then return end
+		if originalTexts[inst] == nil then
+			originalTexts[inst] = current
+		end
+		local masked = maskString(current)
+		if masked ~= current then
+			updatingText = true
+			inst.Text = masked
+			updatingText = false
+		end
+		if not hookedSignals[inst] then
+			hookedSignals[inst] = true
+			NickHider:Clean(inst:GetPropertyChangedSignal('Text'):Connect(function()
+				if updatingText or not NickHider.Enabled then return end
+				pcall(function()
+					local raw = inst.Text
+					originalTexts[inst] = raw
+					local m = maskString(raw)
+					if m ~= raw then
+						updatingText = true
+						inst.Text = m
+						updatingText = false
+					end
+				end)
+			end))
+		end
+	end)
+end
+
+local function sweepContainer(container)
+	if not container then return end
+	pcall(function()
+		for _, desc in ipairs(container:GetDescendants()) do
+			if desc:IsA('TextLabel') or desc:IsA('TextButton') then
+				processTextInstance(desc)
+			end
+		end
+	end)
+end
+
+local function restoreAllTexts()
+	updatingText = true
+	for inst, orig in pairs(originalTexts) do
+		pcall(function()
+			if inst and inst.Parent and type(orig) == 'string' then
+				inst.Text = orig
+			end
+		end)
+	end
+	updatingText = false
+	table.clear(originalTexts)
+	table.clear(hookedSignals)
+end
+
+NickHider = vape.Categories.Utility:CreateModule({
+	Name = 'NickHider',
+	Function = function(callback)
+		if callback then
+			local pgui = lplr and lplr:FindFirstChildOfClass('PlayerGui')
+			if pgui then
+				sweepContainer(pgui)
+				NickHider:Clean(pgui.DescendantAdded:Connect(function(desc)
+					if desc:IsA('TextLabel') or desc:IsA('TextButton') then
+						task.defer(processTextInstance, desc)
+					end
+				end))
+			end
+			sweepContainer(workspace)
+			NickHider:Clean(workspace.DescendantAdded:Connect(function(desc)
+				if desc:IsA('TextLabel') or desc:IsA('TextButton') then
+					task.defer(processTextInstance, desc)
+				end
+			end))
+			pcall(function()
+				sweepContainer(coreGui)
+				NickHider:Clean(coreGui.DescendantAdded:Connect(function(desc)
+					if desc:IsA('TextLabel') or desc:IsA('TextButton') then
+						task.defer(processTextInstance, desc)
+					end
+				end))
+			end)
+		else
+			restoreAllTexts()
+		end
+	end,
+	ExtraText = function()
+		return (CustomNick and CustomNick.Value ~= '' and CustomNick.Value) or '.gg/darkvape'
+	end,
+	Tooltip = 'Hides your username and display name across all UIs, scoreboards, killfeeds, and nametags with .gg/darkvape.'
+})
+
+CustomNick = NickHider:CreateTextBox({
+	Name = 'Nickname',
+	Default = '.gg/darkvape',
+	Placeholder = '.gg/darkvape',
+	Function = function()
+		if NickHider.Enabled then
+			restoreAllTexts()
+			local pgui = lplr and lplr:FindFirstChildOfClass('PlayerGui')
+			if pgui then sweepContainer(pgui) end
+			sweepContainer(workspace)
+			pcall(function() sweepContainer(coreGui) end)
+		end
+	end
+})
+
+HideOthers = NickHider:CreateToggle({
+	Name = 'Hide Other Players',
+	Default = false,
+	Function = function(callback)
+		if OtherNick then OtherNick.Object.Visible = callback end
+		if NickHider.Enabled then
+			restoreAllTexts()
+			local pgui = lplr and lplr:FindFirstChildOfClass('PlayerGui')
+			if pgui then sweepContainer(pgui) end
+			sweepContainer(workspace)
+			pcall(function() sweepContainer(coreGui) end)
+		end
+	end
+})
+
+OtherNick = NickHider:CreateTextBox({
+	Name = 'Other Nickname',
+	Default = '.gg/darkvape',
+	Placeholder = '.gg/darkvape',
+	Visible = false,
+	Darker = true,
+	Function = function()
+		if NickHider.Enabled then
+			restoreAllTexts()
+			local pgui = lplr and lplr:FindFirstChildOfClass('PlayerGui')
+			if pgui then sweepContainer(pgui) end
+			sweepContainer(workspace)
+			pcall(function() sweepContainer(coreGui) end)
+		end
+	end
+})
 
 end)
 
@@ -21938,7 +22178,7 @@ run(function()
 local Killaura
 local Range, SwingRange, Rate, MaxTargets, Sort, Angle
 local PlayersToggle, NPCsToggle, WallCheck, IgnoreNaked, IgnoreInvisible
-local Mouse, Pause, AutoSwitch, FaceTarget, Swing, ChargeRatio
+local Mouse, Pause, AutoSwitch, FaceTarget, Swing, ChargeRatio, ExtendReach, ShowAuraRing
 local ShowProfileCard, ProfilePosition
 local ShowTarget, HighlightStyle, FillAlpha, OutlineAlpha, TargetColor, AttackColor
 
@@ -21950,6 +22190,8 @@ local nextAttack = 0
 local nextSwing = 0
 local highlight
 local boxAdorn
+local auraRingAdorn
+local upgradedSavedRange = false
 local profileGui, profileFrame, avatarImage, nameLabel, subLabel, hpTextLabel, hpBarFill, hpStroke
 local lastCardTargetName = ''
 local stats = {
@@ -21975,28 +22217,68 @@ local function getLocalRoot()
 	return ok and res or nil
 end
 
-local function getHandMelee()
+local lastEquipSync = 0
+local function ensureServerEquipped(tool)
+	if not tool then return end
+	pcall(function()
+		local check = lplr.Character and lplr.Character:FindFirstChild('HandInvItem')
+		if check and check.Value ~= tool and tool.Parent ~= nil then
+			local now = os.clock()
+			if now - lastEquipSync >= 0.08 then
+				lastEquipSync = now
+				check.Value = tool
+				if bedwars and bedwars.Client and remotes and remotes.EquipItem then
+					task.spawn(function()
+						pcall(function()
+							bedwars.Client:Get(remotes.EquipItem):CallServerAsync({hand = tool})
+						end)
+					end)
+				elseif switchItem then
+					task.spawn(switchItem, tool, 0)
+				end
+			end
+		end
+	end)
+end
+
+local function getHandMelee(hasTargetInRange)
 	local ok, tool, itemType = pcall(function()
 		local inv = InventoryUtil.getInventory(lplr)
 		local hand = inv and inv.hand
 		if hand and hand.tool and hand.itemType and table.find(BedwarsMelees, hand.itemType) then
 			return hand.tool, hand.itemType
 		end
+		if AutoSwitch and AutoSwitch.Enabled and inv and inv.items then
+			local bestTool, bestType, bestDmg = nil, nil, -1
+			for _, item in pairs(inv.items) do
+				if item and item.tool and item.itemType and table.find(BedwarsMelees, item.itemType) then
+					local meta = bedwars and bedwars.ItemMeta and bedwars.ItemMeta[item.itemType]
+					local dmg = (meta and meta.sword and meta.sword.damage) or 1
+					if dmg > bestDmg then
+						bestTool, bestType, bestDmg = item.tool, item.itemType, dmg
+					end
+				end
+			end
+			if bestTool and bestType then
+				return bestTool, bestType
+			end
+		end
 		return nil, nil
 	end)
 	if ok and tool and itemType then
+		if hasTargetInRange then
+			ensureServerEquipped(tool)
+		end
 		return tool, itemType
 	end
-	if AutoSwitch and AutoSwitch.Enabled and store and store.tools and store.tools.sword and store.tools.sword.tool then
-		local swordTool = store.tools.sword.tool
-		local sType = swordTool.Name
-		if table.find(BedwarsMelees, sType) then
-			pcall(function()
-				if switchItem then switchItem(swordTool, 0) end
-			end)
-			if swordTool.Parent then
-				return swordTool, sType
+	if AutoSwitch and AutoSwitch.Enabled and getSword then
+		local okS, sItem = pcall(getSword)
+		if okS and sItem and sItem.tool then
+			local sType = sItem.itemType or sItem.tool.Name
+			if hasTargetInRange then
+				ensureServerEquipped(sItem.tool)
 			end
+			return sItem.tool, sType
 		end
 	end
 	return nil, nil
@@ -22262,8 +22544,25 @@ local function updateVisuals(targetChar, targetRoot, inAttackRange)
 	local colSlider = inAttackRange and AttackColor or TargetColor
 	local col = Color3.fromHSV(colSlider.Hue, colSlider.Sat, colSlider.Value)
 	local style = HighlightStyle and HighlightStyle.Value or 'Highlight'
+	local myRoot = getLocalRoot()
 
 	pcall(function()
+		if auraRingAdorn then
+			local showRing = ShowAuraRing and ShowAuraRing.Enabled and myRoot ~= nil
+			if showRing then
+				local r = Range and Range.Value or 20
+				auraRingAdorn.Adornee = myRoot
+				auraRingAdorn.Radius = r
+				auraRingAdorn.InnerRadius = math.max(0.5, r - 0.22)
+				auraRingAdorn.Color3 = col
+				auraRingAdorn.Transparency = inAttackRange and 0.18 or 0.48
+				auraRingAdorn.CFrame = CFrame.new(0, -2.6, 0) * CFrame.Angles(math.rad(90), 0, 0)
+				auraRingAdorn.Visible = true
+			else
+				if auraRingAdorn.Visible then auraRingAdorn.Visible = false end
+				if auraRingAdorn.Adornee ~= nil then auraRingAdorn.Adornee = nil end
+			end
+		end
 		if highlight then
 			local useHighlight = show and (style == 'Highlight' or style == 'Both')
 			if useHighlight then
@@ -22418,30 +22717,79 @@ local function collectTargets(myRoot)
 	return candidates
 end
 
--- Exact Lutosys SwordHit attack function
+-- Dual-Mode Extended HitAura SwordHit function:
+-- 1) Inside normal range (<= 14.0 studs): fires exact unmodified Lutosys payload for 100% close-range reliability
+-- 2) Extended HitAura range (14.0 - 25.0 studs): splits reach extension across selfPosition (+5.8) and targetPosition (-4.5) + raycast + micro-step
 local function swordAttack(myRoot, targetEntry, tool)
 	pcall(function()
 		if not SwordEvent then return end
 		local plrChar = targetEntry.Character or targetEntry.Root:FindFirstAncestorOfClass('Model')
 		if not plrChar then return end
+		local actualRoot = plrChar.PrimaryPart or targetEntry.Root
+		if not actualRoot then return end
 
-		local args = {
+		ensureServerEquipped(tool)
+
+		local selfpos = myRoot.Position
+		local tpos = actualRoot.Position
+		local delta = tpos - selfpos
+		local dist = delta.Magnitude
+		local dir = dist > 0.001 and (delta / dist) or myRoot.CFrame.LookVector
+		local cr = ChargeRatio.Value / 100
+
+		if bedwars and bedwars.SwordController then
+			bedwars.SwordController.lastAttack = workspace:GetServerTimeNow()
+		end
+
+		if not (ExtendReach and ExtendReach.Enabled) or dist <= 14.0 then
+			SwordEvent:FireServer({
+				chargedAttack = {
+					chargeRatio = cr
+				},
+				entityInstance = plrChar,
+				validate = {
+					selfPosition = {
+						value = selfpos
+					},
+					targetPosition = {
+						value = tpos
+					}
+				},
+				weapon = tool
+			})
+			stats.Requests += 1
+			return
+		end
+
+		-- Extended HitAura reach (14.0 to 25.0 studs)
+		local selfStep = math.min(math.max(dist - 14.2, 0), 5.8)
+		local pos = selfpos + dir * selfStep
+		local rem = math.max((tpos - pos).Magnitude - 14.2, 0)
+		local tposClamped = tpos - dir * math.min(rem, 4.5)
+
+		SwordEvent:FireServer({
+			weapon = tool,
 			chargedAttack = {
-				chargeRatio = ChargeRatio.Value / 100
+				chargeRatio = cr
 			},
 			entityInstance = plrChar,
 			validate = {
+				raycast = {
+					cameraPosition = {
+						value = pos
+					},
+					cursorDirection = {
+						value = dir
+					}
+				},
 				selfPosition = {
-					value = myRoot.Position
+					value = pos
 				},
 				targetPosition = {
-					value = targetEntry.Root.Position
+					value = tposClamped
 				}
-			},
-			weapon = tool
-		}
-
-		SwordEvent:FireServer(args)
+			}
+		})
 		stats.Requests += 1
 	end)
 end
@@ -22456,14 +22804,16 @@ local function step()
 	end
 
 	local clickGuiOpen = false
-	pcall(function()
-		clickGuiOpen = vape.gui and vape.gui.ScaledGui and vape.gui.ScaledGui.ClickGui.Visible or false
-	end)
 	local layerOpen = false
-	if Pause.Enabled and not clickGuiOpen and bedwars and bedwars.AppController then
+	if Pause.Enabled then
 		pcall(function()
-			layerOpen = bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN)
+			clickGuiOpen = vape.gui and vape.gui.ScaledGui and vape.gui.ScaledGui.ClickGui.Visible or false
 		end)
+		if not clickGuiOpen and bedwars and bedwars.AppController then
+			pcall(function()
+				layerOpen = bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN)
+			end)
+		end
 	end
 	if inputService:GetFocusedTextBox() or (Pause.Enabled and (clickGuiOpen or layerOpen)) then
 		clearTarget('menu open')
@@ -22474,14 +22824,6 @@ local function step()
 		clearTarget('hold left mouse')
 		return
 	end
-
-	local tool, handType = getHandMelee()
-	if not tool or not handType then
-		stats.Weapon = ''
-		clearTarget('equip a melee weapon')
-		return
-	end
-	stats.Weapon = handType
 
 	local targets = collectTargets(myRoot)
 	stats.TargetsInRange = #targets
@@ -22495,11 +22837,20 @@ local function step()
 	local inSwingRange = primary.Distance <= math.max(Range.Value, SwingRange.Value)
 	stats.Target = primary.Name
 	stats.Distance = math.floor(primary.Distance * 100) / 100
-	stats.Status = inAttackRange and 'attacking' or 'swinging'
-	Attacking = inSwingRange
 
 	updateVisuals(primary.Character, primary.Root, inAttackRange)
 	updateProfileCard(primary, inAttackRange)
+
+	local tool, handType = getHandMelee(inSwingRange)
+	if not tool or not handType then
+		stats.Weapon = ''
+		stats.Status = 'equip a melee weapon'
+		Attacking = false
+		return
+	end
+	stats.Weapon = handType
+	stats.Status = inAttackRange and 'attacking' or 'swinging'
+	Attacking = inSwingRange
 
 	if FaceTarget.Enabled and inAttackRange then
 		pcall(function()
@@ -22551,12 +22902,26 @@ Killaura = vape.Categories.Blatant:CreateModule({
 			clearTarget('off')
 			pcall(function() if highlight then highlight:Destroy() end end)
 			pcall(function() if boxAdorn then boxAdorn:Destroy() end end)
+			pcall(function() if auraRingAdorn then auraRingAdorn:Destroy() end end)
 			pcall(function() if profileGui then profileGui:Destroy() end end)
 			highlight = nil
 			boxAdorn = nil
+			auraRingAdorn = nil
 			profileGui = nil
 			profileFrame = nil
 			return
+		end
+
+		if not upgradedSavedRange then
+			upgradedSavedRange = true
+			pcall(function()
+				if Range and Range.Value < 19 then Range:SetValue(20) end
+				if SwingRange and SwingRange.Value < 21 then SwingRange:SetValue(22) end
+				if Rate and Rate.Value < 16 then Rate:SetValue(18) end
+				if MaxTargets and MaxTargets.Value < 2 then MaxTargets:SetValue(3) end
+				if Pause and Pause.Enabled then Pause:Toggle() end
+				if AutoSwitch and not AutoSwitch.Enabled then AutoSwitch:Toggle() end
+			end)
 		end
 
 		local parentContainer = workspace.CurrentCamera or workspace
@@ -22586,14 +22951,31 @@ Killaura = vape.Categories.Blatant:CreateModule({
 			boxAdorn.Parent = parentContainer
 		end)
 
+		pcall(function()
+			auraRingAdorn = Instance.new('CylinderHandleAdornment')
+			auraRingAdorn.Name = 'DarkVapeAuraRing'
+			auraRingAdorn.AlwaysOnTop = false
+			auraRingAdorn.Height = 0.08
+			auraRingAdorn.Radius = Range and Range.Value or 20
+			auraRingAdorn.InnerRadius = math.max(0.5, (Range and Range.Value or 20) - 0.22)
+			auraRingAdorn.Color3 = Color3.fromRGB(168, 112, 248)
+			auraRingAdorn.Transparency = 0.45
+			auraRingAdorn.ZIndex = 1
+			auraRingAdorn.Adornee = nil
+			auraRingAdorn.Visible = false
+			auraRingAdorn.Parent = parentContainer
+		end)
+
 		createProfileGui()
 
 		Killaura:Clean(function()
 			pcall(function() if highlight then highlight.Adornee = nil; highlight:Destroy() end end)
 			pcall(function() if boxAdorn then boxAdorn.Adornee = nil; boxAdorn:Destroy() end end)
+			pcall(function() if auraRingAdorn then auraRingAdorn.Adornee = nil; auraRingAdorn:Destroy() end end)
 			pcall(function() if profileGui then profileGui:Destroy() end end)
 			highlight = nil
 			boxAdorn = nil
+			auraRingAdorn = nil
 			profileGui = nil
 			profileFrame = nil
 		end)
@@ -22618,31 +23000,31 @@ Killaura = vape.Categories.Blatant:CreateModule({
 Range = Killaura:CreateSlider({
 	Name = 'Attack Range',
 	Min = 1,
-	Max = 18,
-	Default = 16,
+	Max = 25,
+	Default = 20,
 	Decimal = 10,
 	Suffix = function(val) return val == 1 and 'stud' or 'studs' end
 })
 SwingRange = Killaura:CreateSlider({
 	Name = 'Swing Range',
 	Min = 1,
-	Max = 24,
-	Default = 18,
+	Max = 30,
+	Default = 22,
 	Decimal = 10,
 	Suffix = function(val) return val == 1 and 'stud' or 'studs' end
 })
 Rate = Killaura:CreateSlider({
 	Name = 'Attacks Per Second',
 	Min = 1,
-	Max = 20,
-	Default = 14,
+	Max = 25,
+	Default = 18,
 	Suffix = 'aps'
 })
 MaxTargets = Killaura:CreateSlider({
 	Name = 'Max Targets',
 	Min = 1,
-	Max = 5,
-	Default = 1
+	Max = 6,
+	Default = 3
 })
 Sort = Killaura:CreateDropdown({
 	Name = 'Target Sort',
@@ -22662,15 +23044,17 @@ ChargeRatio = Killaura:CreateSlider({
 	Default = 0,
 	Suffix = '%'
 })
+ExtendReach = Killaura:CreateToggle({Name = 'Extend Reach (HitAura)', Default = true})
+ShowAuraRing = Killaura:CreateToggle({Name = 'Show Aura Ring', Default = true})
 PlayersToggle = Killaura:CreateToggle({Name = 'Target Players', Default = true})
 NPCsToggle = Killaura:CreateToggle({Name = 'Target NPCs', Default = true})
 WallCheck = Killaura:CreateToggle({Name = 'Wall Check', Default = false})
 IgnoreInvisible = Killaura:CreateToggle({Name = 'Ignore Invisible', Default = false})
 IgnoreNaked = Killaura:CreateToggle({Name = 'Ignore Naked', Default = false})
-AutoSwitch = Killaura:CreateToggle({Name = 'Auto Switch Sword', Default = false})
+AutoSwitch = Killaura:CreateToggle({Name = 'Auto Switch Sword', Default = true})
 FaceTarget = Killaura:CreateToggle({Name = 'Face Target', Default = false})
 Mouse = Killaura:CreateToggle({Name = 'Require Mouse Held', Default = false})
-Pause = Killaura:CreateToggle({Name = 'Pause In Menus', Default = true})
+Pause = Killaura:CreateToggle({Name = 'Pause In Menus', Default = false})
 Swing = Killaura:CreateToggle({Name = 'Swing Animation', Default = true})
 ShowProfileCard = Killaura:CreateToggle({
 	Name = 'Target Profile Preview',
@@ -22989,6 +23373,8 @@ rayParams.FilterType = Enum.RaycastFilterType.Exclude
 rayParams.RespectCanCollide = true
 
 local groundHit
+local disabledFallConns = {}
+
 task.spawn(function()
 	pcall(function()
 		groundHit = bedwars.Client:Get(remotes.GroundHit).instance
@@ -23007,9 +23393,59 @@ local function sendSafeGroundHit()
 				or replicatedStorage.rbxts_include.node_modules['@rbxts'].net.out._NetManaged:FindFirstChild('GroundHit')
 		end
 		if groundHit then
-			groundHit:FireServer(nil, Vector3.new(0, -10, 0), workspace:GetServerTimeNow())
+			groundHit:FireServer(nil, Vector3.new(0, -2, 0), workspace:GetServerTimeNow())
 		end
 	end)
+end
+
+local function neutralizeFallDamageController(char)
+	pcall(function()
+		runService:UnbindFromRenderStep('VelocityTracking')
+	end)
+	pcall(function()
+		if bedwars and bedwars.FallDamageController then
+			bedwars.FallDamageController.additionalRegisteredVelocity = 0
+		end
+	end)
+	local hum = char and char:FindFirstChildOfClass('Humanoid')
+	if hum and getconnections then
+		pcall(function()
+			for _, conn in ipairs(getconnections(hum.StateChanged)) do
+				local fn = conn.Function
+				if fn and debug and debug.getupvalues then
+					local ups = debug.getupvalues(fn)
+					local isFallController = false
+					for idx, val in pairs(ups) do
+						if typeof(val) == 'Vector3' then
+							pcall(debug.setupvalue, fn, idx, Vector3.zero)
+							isFallController = true
+						elseif type(val) == 'table' and val.Name == 'FallDamageController' then
+							val.additionalRegisteredVelocity = 0
+							isFallController = true
+						end
+					end
+					if isFallController then
+						for idx, val in pairs(ups) do
+							if type(val) == 'boolean' then
+								pcall(debug.setupvalue, fn, idx, false)
+							end
+						end
+						pcall(function()
+							conn:Disable()
+							table.insert(disabledFallConns, conn)
+						end)
+					end
+				end
+			end
+		end)
+	end
+end
+
+local function restoreFallDamageController()
+	for _, conn in ipairs(disabledFallConns) do
+		pcall(function() conn:Enable() end)
+	end
+	table.clear(disabledFallConns)
 end
 
 NoFall = vape.Categories.Blatant:CreateModule({
@@ -23020,7 +23456,20 @@ NoFall = vape.Categories.Blatant:CreateModule({
 			local lastPacket = 0
 			local extraGravity = 0
 
+			if lplr.Character then
+				neutralizeFallDamageController(lplr.Character)
+			end
+			NoFall:Clean(lplr.CharacterAdded:Connect(function(newChar)
+				task.wait(0.2)
+				if NoFall.Enabled then
+					neutralizeFallDamageController(newChar)
+				end
+			end))
+
 			NoFall:Clean(runService.PreSimulation:Connect(function(dt)
+				pcall(function()
+					runService:UnbindFromRenderStep('VelocityTracking')
+				end)
 				if not entitylib.isAlive then
 					tracked = 0
 					extraGravity = 0
@@ -23031,8 +23480,12 @@ NoFall = vape.Categories.Blatant:CreateModule({
 				local hum = entitylib.character.Humanoid
 				if not root or not hum then return end
 
+				if lplr.Character and #disabledFallConns == 0 then
+					neutralizeFallDamageController(lplr.Character)
+				end
+
 				local vel = root.AssemblyLinearVelocity
-				local minVel = -(Threshold and Threshold.Value or 50)
+				local minVel = -(Threshold and Threshold.Value or 45)
 				if hum.FloorMaterial == Enum.Material.Air then
 					tracked = math.min(tracked, vel.Y)
 				else
@@ -23045,7 +23498,7 @@ NoFall = vape.Categories.Blatant:CreateModule({
 
 				if vel.Y < minVel then
 					local now = os.clock()
-					if now - lastPacket >= 0.08 then
+					if now - lastPacket >= 0.06 then
 						lastPacket = now
 						sendSafeGroundHit()
 					end
@@ -23091,22 +23544,304 @@ NoFall = vape.Categories.Blatant:CreateModule({
 					end
 				end
 			end))
+		else
+			restoreFallDamageController()
 		end
 	end,
-	Tooltip = 'Prevents taking fall damage via GroundHit packet spoofing and pre-landing velocity braking.'
+	Tooltip = 'Completely disables FallDamageController (VelocityTracking & StateChanged) and spoofs GroundHit so you take 0 fall damage.'
 })
 
 Mode = NoFall:CreateDropdown({
 	Name = 'Mode',
-	List = {'Packet + Brake', 'Packet', 'Velocity Brake', 'State Reset', 'Gravity', 'Teleport'}
+	List = {'Packet', 'Packet + Brake', 'Velocity Brake', 'State Reset', 'Gravity', 'Teleport'}
 })
 
 Threshold = NoFall:CreateSlider({
 	Name = 'Fall Speed Threshold',
 	Min = 30,
 	Max = 90,
-	Default = 48,
+	Default = 45,
 	Suffix = 'studs/s'
+})
+
+end)
+
+run(function()
+-- c:\Users\acedi\OneDrive\Desktop\lua\bedwars\patches\Nuker.lua
+-- Luau / Nuker.lua / Roblox Client / BedWars (6872274481)
+local Nuker
+local Range
+local BreakSpeed
+local UpdateRate
+local Custom
+local Bed
+local LuckyBlock
+local IronOre
+local Effect
+local CustomHealth = {}
+local Animation
+local SelfBreak
+local InstantBreak
+local LimitItem
+local customlist, parts = {}, {}
+
+local function customHealthbar(self, blockRef, health, maxHealth, changeHealth, block)
+	if block:GetAttribute('NoHealthbar') then return end
+	if not self.healthbarPart or not self.healthbarBlockRef or self.healthbarBlockRef.blockPosition ~= blockRef.blockPosition then
+		self.healthbarMaid:DoCleaning()
+		self.healthbarBlockRef = blockRef
+		local create = bedwars.Roact.createElement
+		local percent = math.clamp(health / maxHealth, 0, 1)
+		local cleanCheck = true
+		local part = Instance.new('Part')
+		part.Size = Vector3.one
+		part.CFrame = CFrame.new(bedwars.BlockController:getWorldPosition(blockRef.blockPosition))
+		part.Transparency = 1
+		part.Anchored = true
+		part.CanCollide = false
+		part.Parent = workspace
+		self.healthbarPart = part
+		bedwars.QueryUtil:setQueryIgnored(self.healthbarPart, true)
+
+		local mounted = bedwars.Roact.mount(create('BillboardGui', {
+			Size = UDim2.fromOffset(249, 102),
+			StudsOffset = Vector3.new(0, 2.5, 0),
+			Adornee = part,
+			MaxDistance = 40,
+			AlwaysOnTop = true
+		}, {
+			create('Frame', {
+				Size = UDim2.fromOffset(160, 50),
+				Position = UDim2.fromOffset(44, 32),
+				BackgroundColor3 = Color3.new(),
+				BackgroundTransparency = 0.5
+			}, {
+				create('UICorner', {CornerRadius = UDim.new(0, 5)}),
+				create('ImageLabel', {
+					Size = UDim2.new(1, 89, 1, 52),
+					Position = UDim2.fromOffset(-48, -31),
+					BackgroundTransparency = 1,
+					Image = getvapeasset('darkvape/assets/new/blur.png'),
+					ScaleType = Enum.ScaleType.Slice,
+					SliceCenter = Rect.new(52, 31, 261, 502)
+				}),
+				create('TextLabel', {
+					Size = UDim2.fromOffset(145, 14),
+					Position = UDim2.fromOffset(13, 12),
+					BackgroundTransparency = 1,
+					Text = bedwars.ItemMeta[block.Name].displayName or block.Name,
+					TextXAlignment = Enum.TextXAlignment.Left,
+					TextYAlignment = Enum.TextYAlignment.Top,
+					TextColor3 = Color3.new(),
+					TextScaled = true,
+					Font = Enum.Font.Arial
+				}),
+				create('TextLabel', {
+					Size = UDim2.fromOffset(145, 14),
+					Position = UDim2.fromOffset(12, 11),
+					BackgroundTransparency = 1,
+					Text = bedwars.ItemMeta[block.Name].displayName or block.Name,
+					TextXAlignment = Enum.TextXAlignment.Left,
+					TextYAlignment = Enum.TextYAlignment.Top,
+					TextColor3 = color.Dark(uipallet.Text, 0.16),
+					TextScaled = true,
+					Font = Enum.Font.Arial
+				}),
+				create('Frame', {
+					Size = UDim2.fromOffset(138, 4),
+					Position = UDim2.fromOffset(12, 32),
+					BackgroundColor3 = uipallet.Main
+				}, {
+					create('UICorner', {CornerRadius = UDim.new(1, 0)}),
+					create('Frame', {
+						[bedwars.Roact.Ref] = self.healthbarProgressRef,
+						Size = UDim2.fromScale(percent, 1),
+						BackgroundColor3 = Color3.fromHSV(math.clamp(percent / 2.5, 0, 1), 0.89, 0.75)
+					}, {create('UICorner', {CornerRadius = UDim.new(1, 0)})})
+				})
+			})
+		}), part)
+
+		self.healthbarMaid:GiveTask(function()
+			cleanCheck = false
+			self.healthbarBlockRef = nil
+			bedwars.Roact.unmount(mounted)
+			if self.healthbarPart then
+				self.healthbarPart:Destroy()
+			end
+			self.healthbarPart = nil
+		end)
+
+		bedwars.RuntimeLib.Promise.delay(5):andThen(function()
+			if cleanCheck then
+				self.healthbarMaid:DoCleaning()
+			end
+		end)
+	end
+
+	local newpercent = math.clamp((health - changeHealth) / maxHealth, 0, 1)
+	tweenService:Create(self.healthbarProgressRef:getValue(), TweenInfo.new(0.3), {
+		Size = UDim2.fromScale(newpercent, 1), BackgroundColor3 = Color3.fromHSV(math.clamp(newpercent / 2.5, 0, 1), 0.89, 0.75)
+	}):Play()
+end
+
+local function attemptBreak(tab, localPosition)
+	if not tab then return false end
+	for _, v in tab do
+		if (v.Position - localPosition).Magnitude <= Range.Value and bedwars.BlockController:isBlockBreakable({blockPosition = v.Position / 3}, lplr) then
+			if not SelfBreak.Enabled and v:GetAttribute('PlacedByUserId') == lplr.UserId then continue end
+			if (v:GetAttribute('BedShieldEndTime') or 0) > workspace:GetServerTimeNow() then continue end
+			if LimitItem.Enabled and not (store.hand.tool and bedwars.ItemMeta[store.hand.tool.Name].breakBlock) then continue end
+
+			local target, path, endpos = bedwars.breakBlock(v, Effect.Enabled, Animation.Enabled, CustomHealth.Enabled and customHealthbar or nil, InstantBreak.Enabled)
+			if path then
+				local currentnode = target
+				for _, part in parts do
+					part.Position = currentnode or Vector3.zero
+					if currentnode then
+						part.BoxHandleAdornment.Color3 = currentnode == endpos and Color3.new(1, 0.2, 0.2) or currentnode == target and Color3.new(0.2, 0.2, 1) or Color3.new(0.2, 1, 0.2)
+					end
+					currentnode = path[currentnode]
+				end
+			end
+
+			task.wait(InstantBreak.Enabled and (store.damageBlockFail > tick() and 4.5 or 0) or BreakSpeed.Value)
+			return true
+		end
+	end
+	return false
+end
+
+Nuker = vape.Categories.Blatant:CreateModule({
+	Name = 'Nuker',
+	Function = function(callback)
+		if callback then
+			for _ = 1, 30 do
+				local part = Instance.new('Part')
+				part.Anchored = true
+				part.CanQuery = false
+				part.CanCollide = false
+				part.Transparency = 1
+				part.Parent = gameCamera
+				local highlight = Instance.new('BoxHandleAdornment')
+				highlight.Size = Vector3.one
+				highlight.AlwaysOnTop = true
+				highlight.ZIndex = 1
+				highlight.Transparency = 0.5
+				highlight.Adornee = part
+				highlight.Parent = part
+				table.insert(parts, part)
+			end
+
+			local beds = collection('bed', Nuker)
+			local luckyblock = collection('LuckyBlock', Nuker)
+			local ironores = collection('iron-ore', Nuker)
+			customlist = collection('block', Nuker, function(tab, obj)
+				if table.find(Custom.ListEnabled, obj.Name) then
+					table.insert(tab, obj)
+				end
+			end)
+
+			repeat
+				task.wait(1 / UpdateRate.Value)
+				if not Nuker.Enabled then break end
+				if entitylib.isAlive then
+					local localPosition = entitylib.character.RootPart.Position
+
+					if attemptBreak(Bed.Enabled and beds, localPosition) then continue end
+					if attemptBreak(customlist, localPosition) then continue end
+					if attemptBreak(LuckyBlock.Enabled and luckyblock, localPosition) then continue end
+					if attemptBreak(IronOre.Enabled and ironores, localPosition) then continue end
+
+					for _, v in parts do
+						v.Position = Vector3.zero
+					end
+				end
+			until not Nuker.Enabled
+		else
+			for _, v in parts do
+				v:ClearAllChildren()
+				v:Destroy()
+			end
+			table.clear(parts)
+		end
+	end,
+	ExtraText = function()
+		return 'AutoBed'
+	end,
+	Tooltip = 'Automatically breaks enemy beds, bed defense blocks, and lucky blocks around you'
+})
+Range = Nuker:CreateSlider({
+	Name = 'Break range',
+	Min = 1,
+	Max = 30,
+	Default = 30,
+	Suffix = function(val)
+		return val == 1 and 'stud' or 'studs'
+	end
+})
+BreakSpeed = Nuker:CreateSlider({
+	Name = 'Break speed',
+	Min = 0,
+	Max = 0.3,
+	Default = 0.15,
+	Decimal = 100,
+	Suffix = 'seconds'
+})
+UpdateRate = Nuker:CreateSlider({
+	Name = 'Update rate',
+	Min = 1,
+	Max = 120,
+	Default = 60,
+	Suffix = 'hz'
+})
+Custom = Nuker:CreateTextList({
+	Name = 'Custom',
+	Function = function()
+		if not customlist then return end
+		table.clear(customlist)
+		for _, obj in store.blocks do
+			if table.find(Custom.ListEnabled, obj.Name) then
+				table.insert(customlist, obj)
+			end
+		end
+	end
+})
+Bed = Nuker:CreateToggle({
+	Name = 'Break Bed',
+	Default = true
+})
+LuckyBlock = Nuker:CreateToggle({
+	Name = 'Break Lucky Block',
+	Default = true
+})
+IronOre = Nuker:CreateToggle({
+	Name = 'Break Iron Ore',
+	Default = true
+})
+Effect = Nuker:CreateToggle({
+	Name = 'Show Healthbar & Effects',
+	Function = function(callback)
+		if CustomHealth.Object then
+			CustomHealth.Object.Visible = callback
+		end
+	end,
+	Default = true
+})
+CustomHealth = Nuker:CreateToggle({
+	Name = 'Custom Healthbar',
+	Default = true,
+	Darker = true
+})
+Animation = Nuker:CreateToggle({
+	Name = 'Animation',
+	Default = true
+})
+SelfBreak = Nuker:CreateToggle({Name = 'Self Break'})
+InstantBreak = Nuker:CreateToggle({Name = 'Instant Break'})
+LimitItem = Nuker:CreateToggle({
+	Name = 'Limit to items',
+	Tooltip = 'Only breaks when tools are held'
 })
 
 end)
@@ -24807,7 +25542,7 @@ run(function()
 								sendMessage('Death', (killer.DisplayName or killer.Name), 'my gaming chair subscription expired :( | <obj>')
 							end
 						elseif killer == lplr and Toggles.Kill.Enabled then
-							sendMessage('Kill', (killed.DisplayName or killed.Name), 'vxp on top | <obj>')
+							sendMessage('Kill', (killed.DisplayName or killed.Name), 'darkvape on top get cooked | <obj>')
 						end
 					end
 				end))
